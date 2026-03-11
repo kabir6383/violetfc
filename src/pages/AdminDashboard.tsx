@@ -31,14 +31,10 @@ export default function AdminDashboard() {
       return;
     }
 
-    const fetchUsers = async () => {
+    const fetchUsers = () => {
       try {
-        const res = await fetch('/api/admin/users', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        if (!res.ok) throw new Error('Failed to fetch users');
-        const data = await res.json();
-        setUsers(data);
+        const storedUsers = JSON.parse(localStorage.getItem('violet_users') || '[]');
+        setUsers(storedUsers);
       } catch (err: any) {
         setError(err.message);
       } finally {
@@ -63,12 +59,18 @@ export default function AdminDashboard() {
 
   const handleExport = async () => {
     try {
-      const res = await fetch('/api/admin/export', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      if (!res.ok) throw new Error('Export failed');
+      const storedUsers = JSON.parse(localStorage.getItem('violet_users') || '[]');
       
-      const blob = await res.blob();
+      // Dynamic import for xlsx since it's a commonjs module and we are in ESM context potentially
+      const XLSX = await import('xlsx');
+      
+      const worksheet = XLSX.utils.json_to_sheet(storedUsers);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Users");
+      
+      const buffer = XLSX.write(workbook, { type: 'array', bookType: 'xlsx' });
+      const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -84,18 +86,10 @@ export default function AdminDashboard() {
 
   const togglePaymentStatus = async (userId: number, currentStatus: number) => {
     try {
-      const res = await fetch(`/api/admin/users/${userId}/payment`, {
-        method: 'PUT',
-        headers: { 
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}` 
-        },
-        body: JSON.stringify({ is_paid: currentStatus ? 0 : 1 })
-      });
-      
-      if (res.ok) {
-        setUsers(users.map(u => u.id === userId ? { ...u, is_paid: currentStatus ? 0 : 1 } : u));
-      }
+      const storedUsers = JSON.parse(localStorage.getItem('violet_users') || '[]');
+      const updatedUsers = storedUsers.map((u: any) => u.id === userId ? { ...u, is_paid: currentStatus ? 0 : 1 } : u);
+      localStorage.setItem('violet_users', JSON.stringify(updatedUsers));
+      setUsers(updatedUsers);
     } catch (err) {
       alert('Failed to update payment status');
     }
@@ -104,20 +98,10 @@ export default function AdminDashboard() {
   const saveImage = async (id: string) => {
     setSavingImageId(id);
     try {
-      const res = await fetch(`/api/admin/images/${id}`, {
-        method: 'PUT',
-        headers: { 
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}` 
-        },
-        body: JSON.stringify({ url: editingImages[id] })
-      });
-      
-      if (res.ok) {
-        await refreshImages();
-      } else {
-        alert('Failed to update image');
-      }
+      const storedImages = JSON.parse(localStorage.getItem('violet_images') || '[]');
+      const updatedImages = storedImages.map((img: any) => img.id === id ? { ...img, url: editingImages[id] } : img);
+      localStorage.setItem('violet_images', JSON.stringify(updatedImages));
+      await refreshImages();
     } catch (err) {
       alert('Failed to update image');
     } finally {

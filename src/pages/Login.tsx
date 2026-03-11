@@ -17,20 +17,23 @@ export default function Login() {
     setLoading(true);
 
     try {
-      const res = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ identifier, password }),
-      });
+      // Simulate network delay
+      await new Promise(resolve => setTimeout(resolve, 500));
 
-      const data = await res.json();
+      const users = JSON.parse(localStorage.getItem('violet_users') || '[]');
+      const user = users.find((u: any) => 
+        (u.phone === identifier || u.email === identifier) && u.password === password
+      );
 
-      if (!res.ok) {
-        throw new Error(data.error || 'Login failed');
+      if (!user) {
+        throw new Error('Invalid credentials');
       }
 
-      login(data.token, data.user);
-      navigate(data.user.role === 'admin' ? '/admin' : '/');
+      const { password: _, ...userWithoutPassword } = user;
+      
+      // Using user ID as a simple token for prototype
+      login(user.id.toString(), userWithoutPassword);
+      navigate(user.role === 'admin' ? '/admin' : '/');
     } catch (err: any) {
       setError(err.message);
     } finally {

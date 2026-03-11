@@ -33,19 +33,34 @@ export default function Register() {
     setLoading(true);
 
     try {
-      const res = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
+      // Simulate network delay
+      await new Promise(resolve => setTimeout(resolve, 500));
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || 'Registration failed');
+      const users = JSON.parse(localStorage.getItem('violet_users') || '[]');
+      
+      // Check if user already exists
+      const existingUser = users.find((u: any) => u.email === formData.email || u.phone === formData.phone);
+      if (existingUser) {
+        throw new Error('Phone number or email already registered');
       }
 
-      login(data.token, data.user);
+      const newUser = {
+        id: Date.now(),
+        name: formData.name,
+        age: parseInt(formData.age),
+        phone: formData.phone,
+        email: formData.email,
+        password: formData.password,
+        role: 'user',
+        is_paid: 0
+      };
+
+      users.push(newUser);
+      localStorage.setItem('violet_users', JSON.stringify(users));
+
+      const { password: _, ...userWithoutPassword } = newUser;
+      
+      login(newUser.id.toString(), userWithoutPassword);
       navigate('/');
     } catch (err: any) {
       setError(err.message);

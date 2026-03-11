@@ -4,6 +4,7 @@ interface User {
   id: number;
   name: string;
   phone: string;
+  email: string;
   role: string;
   is_paid: number;
 }
@@ -24,15 +25,34 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchUser = async () => {
+    // Initialize default admin if no users exist
+    const existingUsers = localStorage.getItem('violet_users');
+    if (!existingUsers) {
+      const defaultAdmin = {
+        id: 1,
+        name: 'Admin',
+        age: 30,
+        phone: '0000000000',
+        email: 'admin@violet.com',
+        password: 'admin', // Storing plain text for prototype purposes
+        role: 'admin',
+        is_paid: 1
+      };
+      localStorage.setItem('violet_users', JSON.stringify([defaultAdmin]));
+    }
+
+    const fetchUser = () => {
       if (token) {
         try {
-          const res = await fetch('/api/auth/me', {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          if (res.ok) {
-            const data = await res.json();
-            setUser(data);
+          // In a real app, we'd verify the token. Here we just find the user by ID stored in the token.
+          // For this prototype, the token is just the user ID as a string.
+          const users = JSON.parse(localStorage.getItem('violet_users') || '[]');
+          const foundUser = users.find((u: any) => u.id.toString() === token);
+          
+          if (foundUser) {
+            // Don't expose password in state
+            const { password, ...userWithoutPassword } = foundUser;
+            setUser(userWithoutPassword);
           } else {
             logout();
           }
