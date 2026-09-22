@@ -1,6 +1,16 @@
 # VIOLET Fitness Center — Web Application
 
-A full-stack web application for **VIOLET Fitness Center**, a dedicated training facility for women. Built with React 19, Express, SQLite (`better-sqlite3`), and Tailwind CSS, this system supports member registration, interactive health metrics estimation, workout program directories, nutrition protocols, and administrative member management with Excel export capabilities.
+A full-stack web application for **VIOLET Fitness Center**, an exclusive training facility created solely for women. Built with React 19, Express, SQLite (`better-sqlite3`), and Tailwind CSS, this system supports member registration, interactive health metrics estimation, workout program directories, nutrition protocols, and administrative member management with Excel export capabilities.
+
+---
+
+## Purpose & Core Mission
+
+**VIOLET Fitness Center** is designed with a single goal: empowering women through fitness, health, and supportive community in a safe, comfortable, and focused environment.
+
+- 🏋️‍♀️ **Exclusively for Women**: Facilities, workout programs, and schedules are created specifically for female members.
+- 👩‍🏫 **Guided Entirely by Women Staff**: Every class, routine, personal training session, and nutrition plan is trained, coached, and guided by an all-female team of certified instructors.
+- 🧘‍♀️ **Holistic Wellness**: Blending cardiovascular endurance, strength conditioning, calisthenics, and tailored nutrition to build sustainable physical strength and confidence.
 
 ---
 
